@@ -1,9 +1,9 @@
 ASP.NET Core Module Configuration Reference
 =============================================
 
-By `Rick Anderson`_ and `Sourabh Shirhatti`_
+By `Luke Latham`_, `Rick Anderson`_ and `Sourabh Shirhatti`_
 
-In ASP.NET Core, the web application is hosted by an external process outside of IIS. The ASP.NET Core Module is an IIS 7.5+ module which is responsible for process management of  ASP.NET Core http listeners and to proxy requests to processes that it manages. This document provides an overview of how to configure the ASP.NET Core Module for shared hosting of ASP.NET Core.
+In ASP.NET Core, the web application is hosted by an external process outside of IIS. The ASP.NET Core Module is an IIS 7.5+ module which is responsible for process management of ASP.NET Core http listeners and to proxy requests to processes that it manages. This document provides an overview of how to configure the ASP.NET Core Module for shared hosting of ASP.NET Core.
 
 .. contents:: Sections:
   :local:
@@ -40,7 +40,7 @@ Configuration Attributes
 |                           | | Arguments to the executable or script            |
 |                           | | specified in  **processPath**   .                |
 |                           | |                                                  |
-|                           | | There is no default value.                       |
+|                           | | An empty string.                                 |
 +---------------------------+----------------------------------------------------+
 | startupTimeLimit          | | Optional integer attribute.                      |
 |                           | |                                                  |
@@ -48,10 +48,10 @@ Configuration Attributes
 |                           | | the handler will wait for the executable or      |
 |                           | | script to start a process listening on           |
 |                           | | the port. If this time limit is exceeded,        |
-|                           | | the handler will kill the process and try to     |
+|                           | | the handler will kill the process and attempt to |
 |                           | | launch it again **startupRetryCount** times.     |
 |                           | |                                                  |
-|                           | | The default value is 10.                         |
+|                           | | The default value is 120.                        |
 +---------------------------+----------------------------------------------------+
 | startupRetryCount         | | Optional integer attribute.                      |
 |                           | |                                                  |
@@ -71,7 +71,7 @@ Configuration Attributes
 |                           | |                                                  |
 |                           | | The default value is 10.                         |
 +---------------------------+----------------------------------------------------+
-| requestTimeout            | | Optional timespan  attribute.                    |
+| requestTimeout            | | Optional timespan attribute.                     |
 |                           | |                                                  |
 |                           | | Specifies the duration for which the             |
 |                           | | ASP.NET Core Module will wait for a response     |
@@ -80,7 +80,7 @@ Configuration Attributes
 |                           | |                                                  |
 |                           | | The default value is "00:02:00".                 |
 +---------------------------+----------------------------------------------------+
-| stdoutLogEnabled          | | Optional Boolean  attribute.                     |
+| stdoutLogEnabled          | | Optional Boolean attribute.                      |
 |                           | |                                                  |
 |                           | | If true, **stdout** and **stderr** for the       |
 |                           | | process specified in **processPath** will be     |
@@ -99,7 +99,7 @@ Configuration Attributes
 |                           | | relative to the site root and all other paths    |
 |                           | | will be treated as absolute paths.               |
 |                           | |                                                  |
-|                           | | The default value is ``httpplatform-stdout``.    |
+|                           | | The default value is ``aspnetcore-stdout``.      |
 +---------------------------+----------------------------------------------------+
 | forwardWindowsAuthToken   | | True or False.                                   |
 |                           | |                                                  |
@@ -125,20 +125,20 @@ Child Elements
 ASP.NET Core Module app offline
 -------------------------------
 
-If you place a file with the name  *app_offline.htm* at the root of a web application directory, the ASP.NET Core Module will shut-down the application and stop processing any new incoming requests for that application. The ASP.NET Core Module will respond to all requests for dynamic pages in the application by sending back the content of the  *app_offline.htm*  file. For example, you might want to return a "site under construction" or a "down for maintenance" page.
+If you place a file with the name  *app_offline.htm* at the root of a web application directory, the ASP.NET Core Module will shut-down the application and stop processing incoming requests. The ASP.NET Core Module will respond to all requests for dynamic pages in the application by sending back the content of the  *app_offline.htm*  file. For example, you might want to return a "site under construction" or a "down for maintenance" page.
 
 Once the *app_offline.htm* file is removed, the next request will load the application and the application will respond to requests.
 
 
 ASP.NET Core Module configuration examples
-------------------------------------------
+-------------------------------------------
 
 .. _log-redirection:
 
 Log creation and redirection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For logs to be saved, you must create the log directory. The ASP.NET Core Module can redirect ``stdout`` and ``stderr`` logs to disk by setting the ``stdoutLogEnabled``  and ``stdoutLogFile`` properties of the ``aspNetCore`` attribute. Logs are not rotated. It is the responsibilty of the hoster to limit the disk space the logs consume.
+For logs to be saved, you must create the log directory. The ASP.NET Core Module can redirect ``stdout`` and ``stderr`` logs to disk by setting the ``stdoutLogEnabled`` and ``stdoutLogFile`` attributes of the ``aspNetCore`` element. Logs are not rotated. It is the responsibilty of the hoster to limit the disk space the logs consume.
 
 .. literalinclude:: aspnet-core-module/sample/web.config
   :language: xml
