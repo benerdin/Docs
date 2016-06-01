@@ -38,9 +38,9 @@ Configuration Attributes
 | arguments                 | | Optional string attribute.                       |
 |                           | |                                                  |
 |                           | | Arguments to the executable or script            |
-|                           | | specified in  **processPath**   .                |
+|                           | | specified in **processPath**.                    |
 |                           | |                                                  |
-|                           | | An empty string.                                 |
+|                           | | The default value is an empty string.            |
 +---------------------------+----------------------------------------------------+
 | startupTimeLimit          | | Optional integer attribute.                      |
 |                           | |                                                  |
@@ -52,6 +52,15 @@ Configuration Attributes
 |                           | | launch it again **startupRetryCount** times.     |
 |                           | |                                                  |
 |                           | | The default value is 120.                        |
++---------------------------+----------------------------------------------------+
+| shutdownTimeLimit         | | Optional integer attribute.                      |
+|                           | |                                                  |
+|                           | | Duration in seconds for which the                |
+|                           | | the handler will wait for the executable or      |
+|                           | | script to gracefully shutdown when the           |
+|                           | | *app_offline.htm* file is detected               |
+|                           | |                                                  |
+|                           | | The default value is 10.                         |
 +---------------------------+----------------------------------------------------+
 | startupRetryCount         | | Optional integer attribute.                      |
 |                           | |                                                  |
@@ -76,7 +85,7 @@ Configuration Attributes
 |                           | | Specifies the duration for which the             |
 |                           | | ASP.NET Core Module will wait for a response     |
 |                           | | from the process listening on                    |
-|                           | | %HTTP_PLATFORM_PORT%.                            |
+|                           | | %ASPNETCORE_PORT%.                               |
 |                           | |                                                  |
 |                           | | The default value is "00:02:00".                 |
 +---------------------------+----------------------------------------------------+
@@ -104,8 +113,8 @@ Configuration Attributes
 | forwardWindowsAuthToken   | | True or False.                                   |
 |                           | |                                                  |
 |                           | | If  true, the token will be forwarded to the     |
-|                           | | child process listening on %HTTP_PLATFORM_PORT%  |
-|                           | | as a header 'X-IIS-WindowsAuthToken' per request.|
+|                           | | child process listening on %ASPNETCORE_PORT% as a|
+|                           | | header 'MS-ASPNETCORE-WINAUTHTOKEN' per request. |
 |                           | | It is the responsibility of that process to call |
 |                           | | CloseHandle on this token per request.           |
 |                           | |                                                  |
@@ -121,13 +130,17 @@ Child Elements
 | environmentVariables      | | Configures **environmentVariables** collection   |
 |                           | | for the process specified in **processPath**.    |
 +---------------------------+----------------------------------------------------+
+| recycleOnFileChange       | | Specify a list of files to monitor. If any of    |
+|                           | | these files get updated/deleted, the Core Module |
+|                           | | will restart the backend process.                |
++---------------------------+----------------------------------------------------+
 
-ASP.NET Core Module app offline
--------------------------------
+ASP.NET Core Module *app_offline.htm*
+--------------------------------------
 
-If you place a file with the name  *app_offline.htm* at the root of a web application directory, the ASP.NET Core Module will shut-down the application and stop processing incoming requests. The ASP.NET Core Module will respond to all requests for dynamic pages in the application by sending back the content of the  *app_offline.htm*  file. For example, you might want to return a "site under construction" or a "down for maintenance" page.
+If you place a file with the name *app_offline.htm* at the root of a web application directory, the ASP.NET Core Module will attempt to gracefully shut-down the application and stop processing any new incoming requests. If the application is still running after ``shutdownTimeLimit`` number of seconds, the ASP.NET Core Module will kill the running process.
 
-Once the *app_offline.htm* file is removed, the next request will load the application and the application will respond to requests.
+While the *app_offline..htm* file is present, the ASP.NET Core Module will repond to all requests by sending back the contents of the *app_offline.htm* file. Once the *app_offline.htm* file is removed, the next request loads the application, which then responds to requests.
 
 
 ASP.NET Core Module configuration examples
@@ -142,14 +155,14 @@ For logs to be saved, you must create the log directory. The ASP.NET Core Module
 
 .. literalinclude:: aspnet-core-module/sample/web.config
   :language: xml
-  :lines: 12-16,20
+  :lines: 12-15,19
 
 
 Setting environment variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ASP.NET Core Module allows you specify environment variables for the process specified in the ``processPath`` setting by specifying them in ``environmentVariables`` child attribute to the ``aspNetCore`` attribute. The example below illustrates how you would use it.
+The ASP.NET Core Module allows you specify environment variables for the process specified in the ``processPath`` setting by specifying them in ``environmentVariables`` child attribute to the ``aspNetCore`` attribute.
 
 .. literalinclude:: aspnet-core-module/sample/web.config
   :language: xml
-  :lines: 12-20
+  :lines: 12-19
