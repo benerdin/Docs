@@ -30,11 +30,7 @@ With ASP.NET Core you gain the following foundational improvements:
 - New light-weight and modular HTTP request pipeline
 - Ability to host on IIS or self-host in your own process
 - Built on `.NET Core`_, which supports true side-by-side app versioning
-- Ships entirely as `NuGet <http://www.nuget.org/>`__  packages
-- Integrated support for `creating and using NuGet packages <https://docs.nuget.org/create/creating-and-publishing-a-package>`__
-- Single aligned web stack for web UI and web APIs
-- Cloud-ready environment-based configuration
-- Built-in support for dependency injection
+- Ships entirely as `NuGet`_  packages
 - New tooling that simplifies modern web development
 - Build and run cross-platform ASP.NET apps on Windows, Mac and Linux
 - Open source and community focused
@@ -49,12 +45,20 @@ An ASP.NET Core app is simply a console app that creates a web server in its ``M
 .. literalinclude:: /getting-started/sample/aspnetcoreapp/Program.cs
     :language: c#
 
-The ASP.NET Core app is simply a console app that creates a web server in its ``Main`` method. ``Main`` uses `WebHostBuilder <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Hosting/WebHostBuilder/index.html>`__ , which follows the builder pattern, to create a web application host. The builder has methods that define the web server type (for example ``UseKestrel``) and the startup class (``UseStartup``). In the example above, the Kestrel web server is used, but other web servers can be specified. We'll show more about ``UseStartup`` in the next section. ``WebHostBuilder`` provides many optional methods including ``UseIISIntegration`` for hosting in IIS and IIS Express and ``UseContentRoot`` for specifying the root content directory. The ``Build`` and ``Run`` methods build the ``IWebHost`` that will host the app and start it listening for incoming HTTP requests.
+``Main`` uses `WebHostBuilder <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Hosting/WebHostBuilder/index.html>`__ , which follows the builder pattern, to create a web application host. The builder has methods that define the web server (for example ``UseKestrel``) and the startup class (``UseStartup``). In the example above, the Kestrel web server is used, but other web servers can be specified. We'll show more about ``UseStartup`` in the next section. ``WebHostBuilder`` provides many optional methods including ``UseIISIntegration`` for hosting in IIS and IIS Express and ``UseContentRoot`` for specifying the root content directory. The ``Build`` and ``Run`` methods build the ``IWebHost`` that will host the app and start it listening for incoming HTTP requests.
 
 
 Startup
 ---------------------------
-The ``Startup`` class is where the you define the request handling pipeline and where any services needed by the app are configured. The ``Startup`` class (``UseStartup<Startup>`` in the code below) must be public and contain the following methods:
+The ``UseStartup`` method on ``WebHostBuilder`` specifies the ``Startup`` class for your app.
+
+.. literalinclude:: /getting-started/sample/aspnetcoreapp/Program.cs
+    :language: c#
+    :lines: 6-17
+    :dedent: 4
+    :emphasize-lines: 7
+
+The ``Startup`` class is where the you define the request handling pipeline and where any services needed by the app are configured. The ``Startup`` class must be public and contain the following methods:
 
 .. code-block:: c#
 
@@ -69,9 +73,9 @@ The ``Startup`` class is where the you define the request handling pipeline and 
       }
   }
 
-- ``ConfigureServices`` defines the services (see **Services** below) used by your app (such as the ASP.NET MVC Core framework, Entity Framework Core, Identity, etc.)
+- ``ConfigureServices`` defines the services (see Services_ below) used by your app (such as the ASP.NET MVC Core framework, Entity Framework Core, Identity, etc.)
 - ``Configure`` defines the :doc:`middleware </fundamentals/middleware>` in the request pipeline
-- See :doc:`/fundamentals/startup`
+- See :doc:`/fundamentals/startup` for more details
 
 Services
 --------
@@ -85,7 +89,7 @@ In ASP.NET Core you compose your request pipeline using :doc:`/fundamentals/midd
 
 ASP.NET Core comes with a rich set of prebuilt middleware:
 
-- Static files with the :doc:`Static file service </fundamentals/static-files>`
+- :doc:`Static files </fundamentals/static-files>`
 - :doc:`/fundamentals/routing`
 - :doc:`/fundamentals/diagnostics`
 - :doc:`/security/authentication/index`
@@ -99,14 +103,15 @@ Servers
 
 The ASP.NET Core hosting model does not directly listen for requests; rather it relies on an HTTP :doc:`server </fundamentals/servers>` implementation to forward the request to the application. The forwarded request is wrapped as a set of feature interfaces that the application then composes into an ``HttpContext``.  ASP.NET Core includes a managed cross-platform web server, called :ref:`Kestrel <kestrel>`, that you would typically run behind a production web server like `IIS <https://iis.net>`__ or `nginx <http://nginx.org>`__.
 
-Web root
---------
-
-The web root of your app is the root location in your project from which HTTP requests are handled (for example handling of static file requests). The web root of an ASP.NET Core app is configured using the ``webroot`` property in the *project.json* file.
-
 Content root
 ------------
 
+The content root is the base path to any content used by the app, such as its views and web content. By default the content root is the same as application base path for the executable hosting the app; an alternative location can be specified with `WebHostBuilder`.
+
+Web root
+--------
+
+The web root of your app is the root location in your project from which HTTP requests are handled (for example handling of static file requests). The web root of an ASP.NET Core app is configured using the ``webroot`` property in the *project.json* file. When using the static files middleware only files from the web root folder are accessible; the other files in the content root **cannot** be accessed remotely. The default web root path is `<content root>/wwwroot`, but you can specify a different location using the `WebHostBuilder`.
 
 Configuration
 -------------
@@ -120,10 +125,11 @@ Environments
 
 Environments, like "Development" and "Production", are a first-class notion in ASP.NET Core and can  be set using environment variables. See :doc:`/fundamentals/environments` for more information.
 
-Build web UI and web APIs using MVC
------------------------------------
+Build web UI and web APIs using ASP.NET Core MVC
+------------------------------------------------
 
-- ASP.NET Core helps you create well-factored and testable web apps that follow the Model-View-Controller (MVC) pattern. See :doc:`/mvc/index` and :doc:`/testing/index`.
+- You can create well-factored and testable web apps that follow the Model-View-Controller (MVC) pattern. See :doc:`/mvc/index` and :doc:`/testing/index`.
+- You can build HTTP services that support multiple formats and have full support for content negotiation. See :doc:`/mvc/models/formatting`
 - `Razor <http://www.asp.net/web-pages/overview/getting-started/introducing-razor-syntax-c>`__ provides a productive language to create :doc:`Views </mvc/views/index>`
 - :doc:`Tag Helpers </mvc/views/tag-helpers/intro>` enable server-side code to participate in creating and rendering HTML elements in Razor files
 - You can create HTTP services with full support for content negotiation using custom or built-in formatters (JSON, XML)
